@@ -1,0 +1,97 @@
+name: Build and Push Docker Images
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'python-lambda-function-tests/**'
+      - 'logicmonitor-unit-tests/**'
+      - 'terraform-security-tests/**'
+      - '.github/workflows/docker-build-push.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'python-lambda-function-tests/**'
+      - 'logicmonitor-unit-tests/**'
+      - 'terraform-security-tests/**'
+      - '.github/workflows/docker-build-push.yml'
+  workflow_dispatch:
+
+jobs:
+  build-python-lambda-function:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'push' && contains(github.event.commits[0].modified, 'python-lambda-function-tests/') || github.event_name == 'pull_request' && contains(github.event.pull_request.changed_files, 'python-lambda-function-tests/') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to DockerHub
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Python Lambda Function Tests image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./python-lambda-function-tests
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/python-lambda-function-tests:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/python-lambda-function-tests:${{ github.sha }}
+
+  build-logicmonitor-unit:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'push' && contains(github.event.commits[0].modified, 'logicmonitor-unit-tests/') || github.event_name == 'pull_request' && contains(github.event.pull_request.changed_files, 'logicmonitor-unit-tests/') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to DockerHub
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push LogicMonitor Unit Tests image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./logicmonitor-unit-tests
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/logicmonitor-unit-tests:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/logicmonitor-unit-tests:${{ github.sha }}
+
+  build-terraform-security:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'push' && contains(github.event.commits[0].modified, 'terraform-security-tests/') || github.event_name == 'pull_request' && contains(github.event.pull_request.changed_files, 'terraform-security-tests/') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to DockerHub
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Terraform Security Tests image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./terraform-security-tests
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/terraform-security-tests:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/terraform-security-tests:${{ github.sha }}
