@@ -43,6 +43,31 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/python-lambda-function-tests:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/python-lambda-function-tests:${{ github.sha }}
+      
+      - name: Update DockerHub README for Python Lambda Function Tests
+        if: github.event_name != 'pull_request'
+        run: |
+          if [ -f "./python-lambda-function-tests/README.md" ]; then
+            README_CONTENT=$(cat ./python-lambda-function-tests/README.md)
+            ESCAPED_CONTENT=$(echo "$README_CONTENT" | jq -Rs .)
+            REPO_NAME="python-lambda-function-tests"
+            
+            # Get Docker Hub token
+            TOKEN=$(curl -s -H "Content-Type: application/json" -X POST \
+              -d '{"username": "${{ secrets.DOCKERHUB_USERNAME }}", "password": "${{ secrets.DOCKERHUB_TOKEN }}"}' \
+              https://hub.docker.com/v2/users/login/ | jq -r .token)
+            
+            # Update repository description
+            curl -s -H "Authorization: JWT ${TOKEN}" \
+              -H "Content-Type: application/json" \
+              -X PATCH \
+              -d "{\"full_description\": ${ESCAPED_CONTENT}}" \
+              "https://hub.docker.com/v2/repositories/${{ secrets.DOCKERHUB_USERNAME }}/${REPO_NAME}/"
+            
+            echo "Updated README for ${REPO_NAME} on DockerHub"
+          else
+            echo "README.md not found for python-lambda-function-tests"
+          fi
 
   build-logicmonitor-unit:
     if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'push' && contains(github.event.commits[0].modified, 'logicmonitor-unit-tests/') || github.event_name == 'pull_request' && contains(github.event.pull_request.changed_files, 'logicmonitor-unit-tests/') }}
@@ -69,6 +94,31 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/logicmonitor-unit-tests:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/logicmonitor-unit-tests:${{ github.sha }}
+            
+      - name: Update DockerHub README for LogicMonitor Unit Tests
+        if: github.event_name != 'pull_request'
+        run: |
+          if [ -f "./logicmonitor-unit-tests/README.md" ]; then
+            README_CONTENT=$(cat ./logicmonitor-unit-tests/README.md)
+            ESCAPED_CONTENT=$(echo "$README_CONTENT" | jq -Rs .)
+            REPO_NAME="logicmonitor-unit-tests"
+            
+            # Get Docker Hub token
+            TOKEN=$(curl -s -H "Content-Type: application/json" -X POST \
+              -d '{"username": "${{ secrets.DOCKERHUB_USERNAME }}", "password": "${{ secrets.DOCKERHUB_TOKEN }}"}' \
+              https://hub.docker.com/v2/users/login/ | jq -r .token)
+            
+            # Update repository description
+            curl -s -H "Authorization: JWT ${TOKEN}" \
+              -H "Content-Type: application/json" \
+              -X PATCH \
+              -d "{\"full_description\": ${ESCAPED_CONTENT}}" \
+              "https://hub.docker.com/v2/repositories/${{ secrets.DOCKERHUB_USERNAME }}/${REPO_NAME}/"
+            
+            echo "Updated README for ${REPO_NAME} on DockerHub"
+          else
+            echo "README.md not found for logicmonitor-unit-tests"
+          fi
 
   build-terraform-security:
     if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'push' && contains(github.event.commits[0].modified, 'terraform-security-tests/') || github.event_name == 'pull_request' && contains(github.event.pull_request.changed_files, 'terraform-security-tests/') }}
@@ -95,3 +145,28 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/terraform-security-tests:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/terraform-security-tests:${{ github.sha }}
+            
+      - name: Update DockerHub README for Terraform Security Tests
+        if: github.event_name != 'pull_request'
+        run: |
+          if [ -f "./terraform-security-tests/README.md" ]; then
+            README_CONTENT=$(cat ./terraform-security-tests/README.md)
+            ESCAPED_CONTENT=$(echo "$README_CONTENT" | jq -Rs .)
+            REPO_NAME="terraform-security-tests"
+            
+            # Get Docker Hub token
+            TOKEN=$(curl -s -H "Content-Type: application/json" -X POST \
+              -d '{"username": "${{ secrets.DOCKERHUB_USERNAME }}", "password": "${{ secrets.DOCKERHUB_TOKEN }}"}' \
+              https://hub.docker.com/v2/users/login/ | jq -r .token)
+            
+            # Update repository description
+            curl -s -H "Authorization: JWT ${TOKEN}" \
+              -H "Content-Type: application/json" \
+              -X PATCH \
+              -d "{\"full_description\": ${ESCAPED_CONTENT}}" \
+              "https://hub.docker.com/v2/repositories/${{ secrets.DOCKERHUB_USERNAME }}/${REPO_NAME}/"
+            
+            echo "Updated README for ${REPO_NAME} on DockerHub"
+          else
+            echo "README.md not found for terraform-security-tests"
+          fi
