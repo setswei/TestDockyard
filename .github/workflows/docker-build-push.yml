@@ -44,48 +44,15 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/python-lambda-function-tests:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/python-lambda-function-tests:${{ github.sha }}
       
-      - name: Update DockerHub README for Python Lambda Function Tests
+      - name: Update Docker Hub Description
         if: github.event_name != 'pull_request'
-        run: |
-          if [ -f "./python-lambda-function-tests/README.md" ]; then
-            README_CONTENT=$(cat ./python-lambda-function-tests/README.md)
-            ESCAPED_CONTENT=$(echo "$README_CONTENT" | jq -Rs .)
-            REPO_NAME="python-lambda-function-tests"
-            
-            # Get Docker Hub token - using direct credentials instead of token
-            TOKEN=$(curl -s -H "Content-Type: application/json" -X POST \
-              -d "{\"username\": \"${{ secrets.DOCKERHUB_USERNAME }}\", \"password\": \"${{ secrets.DOCKERHUB_TOKEN }}\"}" \
-              https://hub.docker.com/v2/users/login/ | jq -r .token)
-            
-            if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
-              echo "Failed to get DockerHub token. Check your credentials."
-              exit 1
-            fi
-            
-            # Create repository if it doesn't exist (will return error if it already exists)
-            curl -s -H "Authorization: JWT ${TOKEN}" \
-              -H "Content-Type: application/json" \
-              -X POST \
-              -d "{\"namespace\": \"${{ secrets.DOCKERHUB_USERNAME }}\", \"name\": \"${REPO_NAME}\", \"is_private\": false}" \
-              "https://hub.docker.com/v2/repositories/" || true
-            
-            # Update repository description
-            RESPONSE=$(curl -s -H "Authorization: JWT ${TOKEN}" \
-              -H "Content-Type: application/json" \
-              -X PATCH \
-              -d "{\"full_description\": ${ESCAPED_CONTENT}}" \
-              "https://hub.docker.com/v2/repositories/${{ secrets.DOCKERHUB_USERNAME }}/${REPO_NAME}/")
-            
-            echo "API Response: $RESPONSE"
-            if [[ "$RESPONSE" == *"forbidden"* ]]; then
-              echo "Warning: Unable to update README. This is often because the repository was just created."
-              echo "The image will still be pushed successfully."
-            else
-              echo "Updated README for ${REPO_NAME} on DockerHub"
-            fi
-          else
-            echo "README.md not found for python-lambda-function-tests"
-          fi
+        uses: peter-evans/dockerhub-description@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: ${{ secrets.DOCKERHUB_USERNAME }}/python-lambda-function-tests
+          readme-filepath: ./python-lambda-function-tests/README.md
+          short-description: "Python Lambda Function Testing Container"
 
   build-logicmonitor-unit:
     if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'push' && contains(github.event.commits[0].modified, 'logicmonitor-unit-tests/') || github.event_name == 'pull_request' && contains(github.event.pull_request.changed_files, 'logicmonitor-unit-tests/') }}
@@ -113,48 +80,15 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/logicmonitor-unit-tests:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/logicmonitor-unit-tests:${{ github.sha }}
             
-      - name: Update DockerHub README for LogicMonitor Unit Tests
+      - name: Update Docker Hub Description
         if: github.event_name != 'pull_request'
-        run: |
-          if [ -f "./logicmonitor-unit-tests/README.md" ]; then
-            README_CONTENT=$(cat ./logicmonitor-unit-tests/README.md)
-            ESCAPED_CONTENT=$(echo "$README_CONTENT" | jq -Rs .)
-            REPO_NAME="logicmonitor-unit-tests"
-            
-            # Get Docker Hub token - using direct credentials instead of token
-            TOKEN=$(curl -s -H "Content-Type: application/json" -X POST \
-              -d "{\"username\": \"${{ secrets.DOCKERHUB_USERNAME }}\", \"password\": \"${{ secrets.DOCKERHUB_TOKEN }}\"}" \
-              https://hub.docker.com/v2/users/login/ | jq -r .token)
-            
-            if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
-              echo "Failed to get DockerHub token. Check your credentials."
-              exit 1
-            fi
-            
-            # Create repository if it doesn't exist (will return error if it already exists)
-            curl -s -H "Authorization: JWT ${TOKEN}" \
-              -H "Content-Type: application/json" \
-              -X POST \
-              -d "{\"namespace\": \"${{ secrets.DOCKERHUB_USERNAME }}\", \"name\": \"${REPO_NAME}\", \"is_private\": false}" \
-              "https://hub.docker.com/v2/repositories/" || true
-            
-            # Update repository description
-            RESPONSE=$(curl -s -H "Authorization: JWT ${TOKEN}" \
-              -H "Content-Type: application/json" \
-              -X PATCH \
-              -d "{\"full_description\": ${ESCAPED_CONTENT}}" \
-              "https://hub.docker.com/v2/repositories/${{ secrets.DOCKERHUB_USERNAME }}/${REPO_NAME}/")
-            
-            echo "API Response: $RESPONSE"
-            if [[ "$RESPONSE" == *"forbidden"* ]]; then
-              echo "Warning: Unable to update README. This is often because the repository was just created."
-              echo "The image will still be pushed successfully."
-            else
-              echo "Updated README for ${REPO_NAME} on DockerHub"
-            fi
-          else
-            echo "README.md not found for logicmonitor-unit-tests"
-          fi
+        uses: peter-evans/dockerhub-description@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: ${{ secrets.DOCKERHUB_USERNAME }}/logicmonitor-unit-tests
+          readme-filepath: ./logicmonitor-unit-tests/README.md
+          short-description: "LogicMonitor Unit Testing Container"
 
   build-terraform-security:
     if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'push' && contains(github.event.commits[0].modified, 'terraform-security-tests/') || github.event_name == 'pull_request' && contains(github.event.pull_request.changed_files, 'terraform-security-tests/') }}
@@ -182,45 +116,12 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/terraform-security-tests:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/terraform-security-tests:${{ github.sha }}
             
-      - name: Update DockerHub README for Terraform Security Tests
+      - name: Update Docker Hub Description
         if: github.event_name != 'pull_request'
-        run: |
-          if [ -f "./terraform-security-tests/README.md" ]; then
-            README_CONTENT=$(cat ./terraform-security-tests/README.md)
-            ESCAPED_CONTENT=$(echo "$README_CONTENT" | jq -Rs .)
-            REPO_NAME="terraform-security-tests"
-            
-            # Get Docker Hub token - using direct credentials instead of token
-            TOKEN=$(curl -s -H "Content-Type: application/json" -X POST \
-              -d "{\"username\": \"${{ secrets.DOCKERHUB_USERNAME }}\", \"password\": \"${{ secrets.DOCKERHUB_TOKEN }}\"}" \
-              https://hub.docker.com/v2/users/login/ | jq -r .token)
-            
-            if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
-              echo "Failed to get DockerHub token. Check your credentials."
-              exit 1
-            fi
-            
-            # Create repository if it doesn't exist (will return error if it already exists)
-            curl -s -H "Authorization: JWT ${TOKEN}" \
-              -H "Content-Type: application/json" \
-              -X POST \
-              -d "{\"namespace\": \"${{ secrets.DOCKERHUB_USERNAME }}\", \"name\": \"${REPO_NAME}\", \"is_private\": false}" \
-              "https://hub.docker.com/v2/repositories/" || true
-            
-            # Update repository description
-            RESPONSE=$(curl -s -H "Authorization: JWT ${TOKEN}" \
-              -H "Content-Type: application/json" \
-              -X PATCH \
-              -d "{\"full_description\": ${ESCAPED_CONTENT}}" \
-              "https://hub.docker.com/v2/repositories/${{ secrets.DOCKERHUB_USERNAME }}/${REPO_NAME}/")
-            
-            echo "API Response: $RESPONSE"
-            if [[ "$RESPONSE" == *"forbidden"* ]]; then
-              echo "Warning: Unable to update README. This is often because the repository was just created."
-              echo "The image will still be pushed successfully."
-            else
-              echo "Updated README for ${REPO_NAME} on DockerHub"
-            fi
-          else
-            echo "README.md not found for terraform-security-tests"
-          fi
+        uses: peter-evans/dockerhub-description@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: ${{ secrets.DOCKERHUB_USERNAME }}/terraform-security-tests
+          readme-filepath: ./terraform-security-tests/README.md
+          short-description: "Terraform Security Testing Container"
