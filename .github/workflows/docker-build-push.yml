@@ -28,6 +28,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
@@ -43,9 +46,12 @@ jobs:
         with:
           context: ./python-lambda-function-tests
           push: ${{ github.event_name != 'pull_request' }}
+          platforms: linux/amd64,linux/arm64
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/python-lambda-function-tests:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/python-lambda-function-tests:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/python-lambda-function-tests:amd64-${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/python-lambda-function-tests:arm64-${{ github.sha }}
       
       - name: Update Docker Hub Description
         if: github.event_name != 'pull_request'
@@ -55,7 +61,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           repository: ${{ secrets.DOCKERHUB_USERNAME }}/python-lambda-function-tests
           readme-filepath: ./python-lambda-function-tests/README.md
-          short-description: "Python Lambda Function Testing Container"
+          short-description: "Python Lambda Function Testing Container (AMD64/ARM64)"
 
   build-logicmonitor-unit:
     if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' || github.event_name == 'push' && contains(github.event.commits[0].modified, 'logicmonitor-unit-tests/') || github.event_name == 'pull_request' && contains(github.event.pull_request.changed_files, 'logicmonitor-unit-tests/') }}
@@ -63,6 +69,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -79,9 +88,12 @@ jobs:
         with:
           context: ./logicmonitor-unit-tests
           push: ${{ github.event_name != 'pull_request' }}
+          platforms: linux/amd64,linux/arm64
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/logicmonitor-unit-tests:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/logicmonitor-unit-tests:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/logicmonitor-unit-tests:amd64-${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/logicmonitor-unit-tests:arm64-${{ github.sha }}
             
       - name: Update Docker Hub Description
         if: github.event_name != 'pull_request'
@@ -91,7 +103,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           repository: ${{ secrets.DOCKERHUB_USERNAME }}/logicmonitor-unit-tests
           readme-filepath: ./logicmonitor-unit-tests/README.md
-          short-description: "LogicMonitor Unit Testing Container"
+          short-description: "LogicMonitor Unit Testing Container (AMD64/ARM64)"
 
   build-terraform-security:
     if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' || github.event_name == 'push' && contains(github.event.commits[0].modified, 'terraform-security-tests/') || github.event_name == 'pull_request' && contains(github.event.pull_request.changed_files, 'terraform-security-tests/') }}
@@ -99,6 +111,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -115,9 +130,12 @@ jobs:
         with:
           context: ./terraform-security-tests
           push: ${{ github.event_name != 'pull_request' }}
+          platforms: linux/amd64,linux/arm64
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/terraform-security-tests:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/terraform-security-tests:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/terraform-security-tests:amd64-${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/terraform-security-tests:arm64-${{ github.sha }}
             
       - name: Update Docker Hub Description
         if: github.event_name != 'pull_request'
@@ -127,4 +145,4 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           repository: ${{ secrets.DOCKERHUB_USERNAME }}/terraform-security-tests
           readme-filepath: ./terraform-security-tests/README.md
-          short-description: "Terraform Security Testing Container"
+          short-description: "Terraform Security Testing Container (AMD64/ARM64)"
